@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  cassandra:
+    image: cassandra:4.1
+    container_name: cassandra
+    environment:
+      CASSANDRA_CLUSTER_NAME: "TestCluster"
+      CASSANDRA_DC: "datacenter1"
+      CASSANDRA_RACK: "rack1"
+      CASSANDRA_START_RPC: "true"
+    ports:
+      - "9042:9042"   # CQL native transport
+      - "9160:9160"   # Thrift (optional)
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - db_network
+
+  sybase:
+    image: datagrip/sybase:16.0   # community/testing image
+    container_name: sybase
+    environment:
+      SA_PASSWORD: "myPassword"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "5000:5000"   # Sybase TCP port
+    networks:
+      - db_network
+
+volumes:
+  cassandra_data:
+
+networks:
+  db_network:
+    driver: bridge
