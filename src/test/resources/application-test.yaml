@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:sybase:Tds:localhost:5000/testdb
+    username: sa
+    password: myPassword
+    driver-class-name: com.sybase.jdbc4.jdbc.SybDriver
+
+  cassandra:
+    contact-points: 'localhost'
+    keyspace-name: 'invoicedata'
+    port: 9042
+    local-datacenter: 'datacenter1'
+
+  jpa:
+    database-platform: org.hibernate.dialect.SybaseDialect
+    hibernate:
+      ddl-auto: update
