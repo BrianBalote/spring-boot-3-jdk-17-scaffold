@@ -8,5 +8,5 @@
 
 ### run integration test
 1. ```mvn clean install -DskipTests```
-2. ```docker compose up -d```
-3. run contextLoads 
+2. ```podman compose up -d```
+3. run unit integration tests e.g. contextLoads 
