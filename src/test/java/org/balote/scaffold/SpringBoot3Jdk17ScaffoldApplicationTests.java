@@ -11,5 +11,4 @@ class SpringBoot3Jdk17ScaffoldApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }

@@ -10,24 +10,26 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.time.Duration;
 
 @ActiveProfiles("test")
 @Testcontainers
 @SpringBootTest
 public class SybaseTestContainersTest {
 
-    static Network network = Network.builder()
-            .createNetworkCmdModifier(cmd -> cmd.withName("db_network"))
-            .build();
-
     @Container
     static GenericContainer<?> sybaseContainer = new GenericContainer<>("datagrip/sybase:16.0")
             .withExposedPorts(5000)
             .withEnv("SAPASS", "myPassword")
-            .withNetwork(network)
-            .withNetworkAliases("sybase");
+            .withStartupTimeout(Duration.ofMinutes(5))
+            .waitingFor(
+                    Wait.forListeningPort()
+                            .withStartupTimeout(Duration.ofMinutes(5))
+            );
 
     @DynamicPropertySource
     static void registerDataSourceProperties(DynamicPropertyRegistry registry) {

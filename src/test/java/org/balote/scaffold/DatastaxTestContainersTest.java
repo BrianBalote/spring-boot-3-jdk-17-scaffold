@@ -4,14 +4,18 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import org.assertj.core.api.Assertions;
+import org.balote.scaffold.shared.SharedNetwork;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.cassandra.CassandraContainer;
-import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -20,9 +24,26 @@ import java.util.UUID;
 @SpringBootTest
 public class DatastaxTestContainersTest {
 
-    @Container
-    static CassandraContainer cassandraContainer = new CassandraContainer("cassandra:4.1")
-            .withExposedPorts(9042);
+    static CassandraContainer cassandraContainer;
+
+    @BeforeAll
+    static void startCassandra() {
+        cassandraContainer = new CassandraContainer("cassandra:4.1")
+                .withNetwork(SharedNetwork.getInstance())
+                .withNetworkAliases("cassandra")
+                .withExposedPorts(9042)
+                .withStartupTimeout(Duration.ofMinutes(5))
+                .waitingFor(
+                        Wait.forListeningPort()
+                                .withStartupTimeout(Duration.ofMinutes(5))
+                );
+        cassandraContainer.start();
+    }
+
+    @AfterAll
+    static void stopCassandra() {
+        if (cassandraContainer != null) cassandraContainer.stop();
+    }
 
     @Test
     void testDatastaxCassandra() {
