@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.cassandra.DataCassandraTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.cassandra.CassandraContainer;
@@ -17,10 +18,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.time.Duration;
 import java.util.Objects;
 
+@ActiveProfiles("test-container")
 @Slf4j
 @Testcontainers
 @DataCassandraTest
-public class DatastaxTestContainersTest {
+public class DatastaxCassandraContainerTest {
 
     static CassandraContainer cassandraContainer;
 
@@ -30,7 +32,7 @@ public class DatastaxTestContainersTest {
                 .withExposedPorts(9042)
                 .withEnv("CASSANDRA_AUTHENTICATOR", "PasswordAuthenticator")
                 .withEnv("CASSANDRA_USER", "test_container_user")
-                .withEnv("CASSANDRA_PASSWORD", "test_container_password_1234_")
+                .withEnv("CASSANDRA_PASSWORD", "test_container_password_1234_!")
                 .withEnv("CASSANDRA_DC", "test_container_datacenter")
                 .withStartupTimeout(Duration.ofMinutes(5))
                 .waitingFor(
@@ -38,23 +40,15 @@ public class DatastaxTestContainersTest {
                                 .withStartupTimeout(Duration.ofMinutes(5))
                 );
         cassandraContainer
-                .withInitScript("init.cql")
+                .withInitScript("init.cql") // create and use a keyspace
                 .start();
     }
 
     @DynamicPropertySource
     static void registerCassandraProperties(DynamicPropertyRegistry registry) {
+        // overwrite spring.cassandra.contact-points because the port used by the container can change
         registry.add("spring.cassandra.contact-points",
                 () -> cassandraContainer.getHost() + ":" + cassandraContainer.getMappedPort(9042));
-        registry.add("spring.cassandra.local-datacenter", cassandraContainer::getLocalDatacenter);
-        registry.add("spring.cassandra.username", () -> "test_container_user");
-        registry.add("spring.cassandra.password", () -> "test_container_password_1234_");
-        registry.add("spring.cassandra.keyspace-name", () -> "test_container_keyspace");
-    }
-
-    @AfterAll
-    static void stopCassandra() {
-        if (cassandraContainer != null) cassandraContainer.stop();
     }
 
     @Autowired
@@ -67,5 +61,12 @@ public class DatastaxTestContainersTest {
                 .getString("release_version");
         log.info("Cassandra version: {}", version);
         Assertions.assertTrue(version != null && !version.isEmpty());
+    }
+
+    @AfterAll
+    static void stopCassandra() {
+        if (cassandraContainer != null) {
+            cassandraContainer.stop();
+        }
     }
 }
