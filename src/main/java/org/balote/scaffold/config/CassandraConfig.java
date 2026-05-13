@@ -17,17 +17,17 @@ import java.net.InetSocketAddress;
 @ConfigurationProperties(prefix = "spring.cassandra")
 public class CassandraConfig {
 
-    private String host;
+    private String contactPoints;
     private int port;
-    private String keyspace;
+    private String keyspaceName;
     private String localDatacenter;
     private String username;
     private String password;
 
     @Bean
-    public CqlSession cassandraSession() {
+    public CqlSession cqlSession() {
         return CqlSession.builder()
-                .addContactPoint(new InetSocketAddress(host, port))
+                .addContactPoint(new InetSocketAddress(contactPoints, port))
                 .withLocalDatacenter(localDatacenter)
                 .withAuthCredentials(username, password)
                 .build();

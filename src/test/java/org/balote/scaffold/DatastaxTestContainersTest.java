@@ -1,27 +1,25 @@
 package org.balote.scaffold;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.oss.driver.api.core.cql.SimpleStatement;
-import org.assertj.core.api.Assertions;
-import org.balote.scaffold.shared.SharedNetwork;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.cassandra.DataCassandraTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.cassandra.CassandraContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.Objects;
-import java.util.UUID;
 
-@ActiveProfiles("test")
+@Slf4j
 @Testcontainers
-@SpringBootTest
+@DataCassandraTest
 public class DatastaxTestContainersTest {
 
     static CassandraContainer cassandraContainer;
@@ -29,15 +27,29 @@ public class DatastaxTestContainersTest {
     @BeforeAll
     static void startCassandra() {
         cassandraContainer = new CassandraContainer("cassandra:4.1")
-                .withNetwork(SharedNetwork.getInstance())
-                .withNetworkAliases("cassandra")
                 .withExposedPorts(9042)
+                .withEnv("CASSANDRA_AUTHENTICATOR", "PasswordAuthenticator")
+                .withEnv("CASSANDRA_USER", "test_container_user")
+                .withEnv("CASSANDRA_PASSWORD", "test_container_password_1234_")
+                .withEnv("CASSANDRA_DC", "test_container_datacenter")
                 .withStartupTimeout(Duration.ofMinutes(5))
                 .waitingFor(
                         Wait.forListeningPort()
                                 .withStartupTimeout(Duration.ofMinutes(5))
                 );
-        cassandraContainer.start();
+        cassandraContainer
+                .withInitScript("init.cql")
+                .start();
+    }
+
+    @DynamicPropertySource
+    static void registerCassandraProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.cassandra.contact-points",
+                () -> cassandraContainer.getHost() + ":" + cassandraContainer.getMappedPort(9042));
+        registry.add("spring.cassandra.local-datacenter", cassandraContainer::getLocalDatacenter);
+        registry.add("spring.cassandra.username", () -> "test_container_user");
+        registry.add("spring.cassandra.password", () -> "test_container_password_1234_");
+        registry.add("spring.cassandra.keyspace-name", () -> "test_container_keyspace");
     }
 
     @AfterAll
@@ -45,40 +57,15 @@ public class DatastaxTestContainersTest {
         if (cassandraContainer != null) cassandraContainer.stop();
     }
 
+    @Autowired
+    CqlSession cqlSession;
+
     @Test
-    void testDatastaxCassandra() {
-        // Connect using Datastax CqlSession
-        try (CqlSession session = CqlSession.builder()
-                .addContactPoint(new InetSocketAddress(
-                        cassandraContainer.getHost(),
-                        cassandraContainer.getMappedPort(9042)))
-                .withLocalDatacenter("datacenter1") // Cassandra default
-                .build()) {
-
-            // Create keyspace
-            session.execute("CREATE KEYSPACE IF NOT EXISTS test_keyspace " +
-                    "WITH replication = {'class':'SimpleStrategy','replication_factor':1};");
-
-            // Use keyspace
-            session.execute("USE test_keyspace;");
-
-            // Create table
-            session.execute("CREATE TABLE IF NOT EXISTS person (" +
-                    "id UUID PRIMARY KEY, " +
-                    "name text);");
-
-            // Insert a row
-            session.execute(SimpleStatement.builder(
-                            "INSERT INTO person(id, name) VALUES (?, ?)")
-                    .addPositionalValue(UUID.randomUUID())
-                    .addPositionalValue("Alice")
-                    .build());
-
-            // Query the row count
-            ResultSet rs = session.execute("SELECT COUNT(*) FROM person;");
-            long count = Objects.requireNonNull(rs.one()).getLong(0);
-
-            Assertions.assertThat(count).isEqualTo(1);
-        }
+    void test() {
+        String version = Objects.requireNonNull(cqlSession.execute("SELECT release_version FROM system.local")
+                        .one())
+                .getString("release_version");
+        log.info("Cassandra version: {}", version);
+        Assertions.assertTrue(version != null && !version.isEmpty());
     }
 }

@@ -27,6 +27,7 @@
         <url/>
     </scm>
     <properties>
+        <dependency.check.version>12.2.0</dependency.check.version>
         <java.version>17</java.version>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
@@ -92,6 +93,19 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${dependency.check.version}</version>
+                <configuration>
+                    <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+                    <skipProvidedScope>true</skipProvidedScope>
+                    <skipRuntimeScope>true</skipRuntimeScope>
+                    <format>HTML</format>
+                    <outputDirectory>${project.build.directory}/dependency-check-reports</outputDirectory>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -176,15 +190,6 @@
                 </executions>
                 <configuration>
                     <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
-                    <xml>
-                        <enabled>true</enabled>
-                    </xml>
-                    <csv>
-                        <enabled>false</enabled>
-                    </csv>
-                    <html>
-                        <enabled>true</enabled>
-                    </html>
                 </configuration>
             </plugin>
 

@@ -6,10 +6,12 @@ spring:
     driver-class-name: com.sybase.jdbc4.jdbc.SybDriver
 
   cassandra:
-    contact-points: 'cassandra'
-    keyspace-name: 'invoicedata'
+    contact-points: 'http://localhost'
+    keyspace-name: 'test_container_keyspace'
     port: 9042
-    local-datacenter: 'datacenter1'
+    local-datacenter: 'test_container_datacenter'
+    username: 'test_container_user'
+    password: 'test_container_password_1234_!'
 
   jpa:
     database-platform: org.hibernate.dialect.SybaseDialect
