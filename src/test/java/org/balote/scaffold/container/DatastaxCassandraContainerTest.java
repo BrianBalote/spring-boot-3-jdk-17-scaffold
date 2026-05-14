@@ -1,8 +1,8 @@
-package org.balote.scaffold;
+package org.balote.scaffold.container;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import lombok.extern.slf4j.Slf4j;
-import org.balote.scaffold.shared.AbstractDatastaxCassandraBaseContainerTest;
+import org.balote.scaffold.container.extendable.AbstractCassandraBaseContainerTest;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.cassandra.DataCassandraTest;
@@ -13,7 +13,7 @@ import java.util.Objects;
 @ActiveProfiles("test-container")
 @Slf4j
 @DataCassandraTest
-public class DatastaxCassandraFirstContainerTest extends AbstractDatastaxCassandraBaseContainerTest {
+public class DatastaxCassandraContainerTest extends AbstractCassandraBaseContainerTest {
 
     @Autowired
     CqlSession cqlSession;
