@@ -5,7 +5,6 @@ import org.balote.scaffold.container.shared.SybaseContainerSingleton;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Slf4j
 public abstract class AbstractSybaseBaseContainerTest extends AbstractBaseContainerTest {

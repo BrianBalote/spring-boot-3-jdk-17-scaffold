@@ -13,15 +13,17 @@ public class SybaseContainerSingleton {
     static GenericContainer<?> sybaseContainer;
 
     public static void startSybase() {
-        sybaseContainer = new GenericContainer<>("datagrip/sybase:16.0")
-                .withExposedPorts(5000)
-                .withEnv("SAPASS", "myPassword")
-                .withStartupTimeout(Duration.ofMinutes(5))
-                .waitingFor(
-                        Wait.forListeningPort()
-                                .withStartupTimeout(Duration.ofMinutes(5))
-                );
-        sybaseContainer.start();
+        if(sybaseContainer == null) {
+            sybaseContainer = new GenericContainer<>("datagrip/sybase:16.0")
+                    .withExposedPorts(5000)
+                    .withEnv("SAPASS", "myPassword")
+                    .withStartupTimeout(Duration.ofMinutes(5))
+                    .waitingFor(
+                            Wait.forListeningPort()
+                                    .withStartupTimeout(Duration.ofMinutes(5))
+                    );
+            sybaseContainer.start();
+        }
     }
 
     public static void stopSybase() {
