@@ -16,4 +16,4 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.SybaseDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
