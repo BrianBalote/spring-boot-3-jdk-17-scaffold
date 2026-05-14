@@ -2,21 +2,19 @@ package org.balote.scaffold;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import lombok.extern.slf4j.Slf4j;
-import org.balote.scaffold.shared.DatastaxCassandraBaseTest;
+import org.balote.scaffold.shared.AbstractDatastaxCassandraBaseContainerTest;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.cassandra.DataCassandraTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Objects;
 
 @ActiveProfiles("test-container")
 @Slf4j
-@Testcontainers
 @DataCassandraTest
 @Order(Integer.MAX_VALUE) // set as the last test class to run and call @AfterAll to stop the container
-public class DatastaxCassandraContainerLastTest extends DatastaxCassandraBaseTest {
+public class DatastaxCassandraLastContainerTest extends AbstractDatastaxCassandraBaseContainerTest {
 
     @Autowired
     CqlSession cqlSession;

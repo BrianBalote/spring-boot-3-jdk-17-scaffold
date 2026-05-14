@@ -2,7 +2,6 @@ package org.balote.scaffold.shared;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
-import org.springframework.boot.test.autoconfigure.data.cassandra.DataCassandraTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.cassandra.CassandraContainer;
@@ -14,8 +13,7 @@ import java.time.Instant;
 
 @Slf4j
 @Testcontainers
-@DataCassandraTest
-public abstract class DatastaxCassandraBaseTest {
+public abstract class AbstractDatastaxCassandraBaseContainerTest {
 
     static Instant startTime;
     static CassandraContainer cassandraContainer;
