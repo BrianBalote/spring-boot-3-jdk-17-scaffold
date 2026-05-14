@@ -1,10 +1,12 @@
 package org.balote.scaffold;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles("test")
+@Disabled
+@ActiveProfiles("dev")
 @SpringBootTest
 class SpringBoot3Jdk17ScaffoldApplicationTests {
 

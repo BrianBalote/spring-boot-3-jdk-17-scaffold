@@ -59,7 +59,7 @@ class SybaseContainerTest {
     }
 
     @AfterAll
-    static void stopCassandra() {
+    static void stopSybase() {
         if (sybaseContainer != null) {
             sybaseContainer.stop();
         }
